@@ -7,3 +7,4 @@ It automatically detects the Minecraft version that the mods currently in the mo
 All current mods will be saved to a folder inside your .minecraft\ directory, and you will be prompted to choose a Minecraft version for which to load mods into the mods folder.
 
 Please note that while this program allows you to switch between versions, you will still need to install new mods manually by dragging them into the mods folder.
+### While you can build this yourself if you want, there is a runnable EXE file inside the out/artifacts folder.
