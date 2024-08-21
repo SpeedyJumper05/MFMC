@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 public class MinecraftModManager {
 
+    private static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
         String modsFolderPath = System.getenv("APPDATA") + "\\.minecraft\\mods\\";
         String oldModsBasePath = System.getenv("APPDATA") + "\\.minecraft\\old mods\\Fabric\\";
@@ -15,20 +17,28 @@ public class MinecraftModManager {
         // Step 1: Find the fabric-api mod and extract the version number
         File modsFolder = new File(modsFolderPath);
         File[] files = modsFolder.listFiles();
-        if (files != null) {
-            Pattern pattern = Pattern.compile("fabric-api-.*?\\+(.*?)\\.jar");
 
-            for (File file : files) {
-                Matcher matcher = pattern.matcher(file.getName());
-                if (matcher.find()) {
-                    version = matcher.group(1).replace(".", "-");
-                    break;
-                }
+        // Step 1a: Check if the mods directory is empty
+        if (files == null || files.length == 0) {
+            System.out.println("No mods found in the mods directory.");
+            promptUserToChooseMods();
+            return;
+        }
+
+        Pattern pattern = Pattern.compile("fabric-api-.*?\\+(.*?)\\.jar");
+        boolean fabricApiFound = false;
+
+        for (File file : files) {
+            Matcher matcher = pattern.matcher(file.getName());
+            if (matcher.find()) {
+                version = matcher.group(1).replace(".", "-");
+                fabricApiFound = true;
+                break;
             }
         }
 
-        // Step 1a: Fallback if no Fabric API mod is found
-        if (version == null) {
+        // Step 1b: Fallback if no Fabric API mod is found but other mods are present
+        if (!fabricApiFound) {
             System.out.println("No Fabric API mod found.");
             System.out.println("This program only works with the Fabric mod loader and Fabric API installed.");
             waitForUser();
@@ -65,11 +75,24 @@ public class MinecraftModManager {
         System.out.println("All mods have been saved to the folder: " + versionFolder.getAbsolutePath());
 
         // Step 4: Prompt the user to select a version and copy mods back
-        Scanner scanner = new Scanner(System.in);
+        promptUserToChooseMods();
+
+        // Wait for user input before closing
+        waitForUser();
+
+        // Close the scanner only after everything is done
+        scanner.close();
+    }
+
+    // Method to prompt the user to select a version to load
+    private static void promptUserToChooseMods() {
+        String oldModsBasePath = System.getenv("APPDATA") + "\\.minecraft\\old mods\\Fabric\\";
+        File oldModsFolder = new File(oldModsBasePath);
+
         System.out.println("Select a version to load into the mods folder from the following options:");
         File[] versionFolders = oldModsFolder.listFiles(File::isDirectory);
 
-        if (versionFolders != null) {
+        if (versionFolders != null && versionFolders.length > 0) {
             for (int i = 0; i < versionFolders.length; i++) {
                 System.out.println((i + 1) + ": " + versionFolders[i].getName());
             }
@@ -82,6 +105,7 @@ public class MinecraftModManager {
             }
 
             File selectedVersionFolder = versionFolders[choice - 1];
+            File modsFolder = new File(System.getenv("APPDATA") + "\\.minecraft\\mods\\");
             File[] selectedFiles = selectedVersionFolder.listFiles();
 
             if (selectedFiles != null) {
@@ -99,10 +123,6 @@ public class MinecraftModManager {
         } else {
             System.out.println("No version folders found.");
         }
-
-        // Wait for user input before closing
-        waitForUser();
-        scanner.close();
     }
 
     // Method to wait for user input before closing the console

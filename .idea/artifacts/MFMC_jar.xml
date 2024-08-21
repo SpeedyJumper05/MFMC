@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MFMC:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/MFMC_jar</output-path>
+    <root id="archive" name="MFMC.jar">
+      <element id="module-output" name="MFMC" />
+    </root>
+  </artifact>
+</component>
